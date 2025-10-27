@@ -1,0 +1,36 @@
+# Moodle source (cloned separately)
+/moodle/
+
+# Moodle data directory
+/moodledata/
+
+# Config file (generated)
+/config/
+
+# Docker volumes
+/pgdata/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# misc
+.DS_Store
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+.serena/cache
+plans/**/*
+!plans/templates/*
+screenshots/*
+docs/screenshots/*
+docs/journals
+logs.txt
+test-ck

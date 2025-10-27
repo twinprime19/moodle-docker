@@ -1,0 +1,47 @@
+services:
+  moodle:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    container_name: moodle-app
+    ports:
+      - "18080:80"
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=${DB_NAME:-moodle}
+      - DB_USER=${DB_USER:-moodle}
+      - DB_PASS=${DB_PASSWORD:-moodle_pass_2024}
+    volumes:
+      - ./moodle:/var/www/html
+      - ./moodledata:/var/www/moodledata
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - moodle-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: moodle-db
+    ports:
+      - "15432:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME:-moodle}
+      - POSTGRES_USER=${DB_USER:-moodle}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-moodle_pass_2024}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - moodle-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-moodle}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+
+networks:
+  moodle-network:
+    driver: bridge

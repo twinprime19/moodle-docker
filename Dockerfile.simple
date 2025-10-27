@@ -1,0 +1,45 @@
+FROM php:8.2-apache
+
+# Install only essential PHP extensions for Moodle
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libicu-dev \
+    libzip-dev \
+    postgresql-client \
+    git \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        gd \
+        intl \
+        pdo \
+        pdo_pgsql \
+        pgsql \
+        zip \
+        opcache \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# PHP config
+RUN echo "memory_limit=256M" > /usr/local/etc/php/conf.d/moodle.ini && \
+    echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/moodle.ini && \
+    echo "post_max_size=64M" >> /usr/local/etc/php/conf.d/moodle.ini && \
+    echo "max_execution_time=600" >> /usr/local/etc/php/conf.d/moodle.ini
+
+# Apache config
+RUN a2enmod rewrite
+
+# Create directories
+RUN mkdir -p /var/www/moodledata && \
+    chown -R www-data:www-data /var/www && \
+    chmod 777 /var/www/moodledata
+
+WORKDIR /var/www/html
+
+# Simple init script
+COPY init-simple.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/init-simple.sh
+
+CMD ["/usr/local/bin/init-simple.sh"]
