@@ -1,3 +1,6 @@
+# Claude configuration
+.claude/
+
 # Moodle source (cloned separately)
 /moodle/
 
