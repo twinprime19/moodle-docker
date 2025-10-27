@@ -1,6 +1,9 @@
 # Claude configuration
 .claude/
 
+# OpenCode configuration
+.opencode/
+
 # Moodle source (cloned separately)
 /moodle/
 
