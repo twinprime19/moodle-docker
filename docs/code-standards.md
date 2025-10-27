@@ -58,14 +58,22 @@ moodle-docker/
 
 #### Container Names
 ```yaml
-container_name: moodle-app     # Format: project-service
-container_name: moodle-db      # Hyphenated, lowercase
+container_name: moodle-app     # Format: project-service (web application)
+container_name: moodle-db      # Hyphenated, lowercase (database)
 ```
 
 #### Image Names
 ```dockerfile
-FROM php:8.2-apache            # Official: name:version-variant
-FROM postgres:15-alpine        # Alpine preferred for size
+FROM php:8.2-apache            # Official: name:version-variant (current)
+FROM postgres:15-alpine        # Alpine preferred for size optimization
+```
+
+#### Build Context
+```yaml
+build:
+  context: .                   # Root directory context
+  dockerfile: Dockerfile.simple  # Currently active (minimal PHP 8.2 + Apache)
+# Alternative: Dockerfile      # Full build with all extensions (unused)
 ```
 
 #### Volume Names
@@ -102,17 +110,18 @@ ports:
 
 #### Naming Standards
 ```bash
-DB_HOST=postgres              # Service reference
-DB_NAME=${DB_NAME:-moodle}   # With defaults
+# Current configuration in docker-compose.yml
+DB_HOST=postgres              # Service reference (internal)
+DB_NAME=${DB_NAME:-moodle}   # With defaults from .env
 DB_USER=${DB_USER:-moodle}   # Uppercase, underscore
-DB_PASSWORD=${DB_PASSWORD:-}  # No default for secrets
+DB_PASS=${DB_PASSWORD:-moodle_pass_2024}  # Maps to DB_PASSWORD
 ```
 
 #### Variable Prefixes
-- `DB_*`: Database configuration
-- `APP_*`: Application settings
-- `DOCKER_*`: Container settings
-- `MOODLE_*`: Moodle-specific
+- `DB_*`: Database configuration (currently used)
+- `ADMIN_*`: Moodle admin settings (.env.example)
+- `SITE_*`: Site configuration (.env.example)
+- `MOODLE_*`: Moodle-specific (planned for init.sh)
 
 ## Docker Best Practices
 

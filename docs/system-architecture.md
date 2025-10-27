@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-The Moodle Docker system implements a containerized microservices architecture designed for development efficiency and production scalability preparation.
+The Moodle Docker system implements a simplified 2-service containerized architecture optimized for development efficiency and minimal resource overhead.
 
 ```mermaid
 graph TB
@@ -11,19 +11,19 @@ graph TB
         FS[File System]
     end
 
-    subgraph "Docker Environment"
+    subgraph "Docker Environment - Active Services"
         subgraph "Application Layer"
-            MOODLE[Moodle Container<br/>PHP 8.2 + Apache]
+            MOODLE[Moodle Container<br/>PHP 8.2 + Apache<br/>moodle-app]
         end
 
         subgraph "Data Layer"
-            PG[PostgreSQL Container<br/>15-Alpine]
-            REDIS[Redis Container<br/>Planned]
+            PG[PostgreSQL Container<br/>15-Alpine<br/>moodle-db]
         end
+    end
 
-        subgraph "Utility Layer"
-            MAIL[MailHog Container<br/>Planned]
-        end
+    subgraph "Planned Services (Configured)"
+        REDIS[Redis Cache<br/>Port 16379]
+        MAIL[MailHog Email<br/>Ports 11025/18025]
     end
 
     subgraph "Volumes"
@@ -34,9 +34,9 @@ graph TB
 
     DEV -->|Port 18080| MOODLE
     DEV -->|Port 15432| PG
-    MOODLE -->|DB Connection| PG
-    MOODLE -->|Cache| REDIS
-    MOODLE -->|SMTP| MAIL
+    MOODLE -->|DB Connection<br/>postgres:5432| PG
+    MOODLE -.->|Configured for| REDIS
+    MOODLE -.->|SMTP Ready| MAIL
 
     FS --> VOL1
     FS --> VOL2
@@ -52,20 +52,19 @@ graph TB
 ```yaml
 Docker Network: moodle-network (bridge)
 ├── moodle-app (172.x.0.2)
-│   ├── Apache Web Server
+│   ├── Apache Web Server (port 80 → 18080)
 │   ├── PHP 8.2 Runtime
-│   └── Moodle Application
+│   ├── Moodle Application (MOODLE_501_STABLE)
+│   └── Init Script (init-simple.sh)
 │
 ├── moodle-db (172.x.0.3)
-│   ├── PostgreSQL 15
-│   └── Database Engine
+│   ├── PostgreSQL 15-Alpine (port 5432 → 15432)
+│   ├── Database Engine
+│   └── Health Check (pg_isready)
 │
-├── moodle-redis (172.x.0.4) [Planned]
-│   └── Redis Cache
-│
-└── moodle-mail (172.x.0.5) [Planned]
-    ├── SMTP Server
-    └── Web Interface
+├── [Planned Services]
+│   ├── moodle-redis (Redis Cache)
+│   └── moodle-mail (MailHog SMTP/UI)
 ```
 
 ### Container Specifications
@@ -87,7 +86,8 @@ Docker Network: moodle-network (bridge)
 - Memory: 512MB minimum, 1GB recommended
 - Storage: 5GB for container + volumes
 
-**Entry Point**: `/usr/local/bin/init-simple.sh`
+**Entry Point**: `/usr/local/bin/init-simple.sh` (currently active)
+**Alternative**: `/usr/local/bin/init.sh` (full auto-install)
 
 #### PostgreSQL Database Container
 

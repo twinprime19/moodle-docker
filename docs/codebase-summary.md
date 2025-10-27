@@ -2,46 +2,48 @@
 
 ## Repository Overview
 
-Moodle Docker is a containerized development environment for Moodle LMS, providing automated setup, database management, and development tools through Docker Compose orchestration.
+Moodle Docker is a containerized development environment for Moodle LMS, providing automated setup, database management, and development tools through Docker Compose orchestration. Based on the latest analysis, this is a streamlined Docker setup focused on simplicity and developer productivity.
 
 ## Repository Structure
 
 ```
 moodle-docker/
-├── Docker Configuration
-│   ├── docker-compose.yml       # Service orchestration configuration
-│   ├── Dockerfile               # Full Moodle image with all extensions
-│   └── Dockerfile.simple        # Minimal Moodle image (currently used)
+├── Docker Infrastructure               # 4,761 tokens, 18,079 chars total
+│   ├── docker-compose.yml            # Service orchestration (2 services)
+│   ├── Dockerfile                     # Full Moodle image with extensions (556 tokens)
+│   └── Dockerfile.simple              # Minimal Moodle image (333 tokens, currently used)
 │
-├── Initialization Scripts
-│   ├── init.sh                  # Full initialization with auto-install
-│   ├── init-simple.sh           # Simple initialization (clone & start)
-│   ├── start.sh                 # Service startup management
-│   └── stop.sh                  # Clean shutdown script
+├── Initialization & Management         # Automated setup and lifecycle
+│   ├── init.sh                       # Full initialization with auto-install (937 tokens)
+│   ├── init-simple.sh                # Simple initialization (clone & start)
+│   ├── start.sh                      # Service startup with status display
+│   └── stop.sh                       # Clean shutdown with port cleanup
 │
-├── Configuration
-│   ├── .env.example             # Environment variable template
-│   └── .env                     # Local environment configuration
+├── Configuration Management           # Environment and runtime configuration
+│   ├── .env.example                  # Environment variable template
+│   ├── .env                          # Local environment (git-ignored)
+│   └── .mcp.json                     # MCP server configuration
 │
-├── Application Directories
-│   ├── moodle/                  # Moodle source code (auto-cloned, git-ignored)
-│   ├── moodledata/              # Moodle data files (persistent storage)
-│   └── config/                  # Generated Moodle configuration
+├── Application Layer                 # Moodle application and data
+│   ├── moodle/                       # Moodle source code (auto-cloned, git-ignored)
+│   ├── moodledata/                   # Moodle data files (persistent storage)
+│   └── config/                       # Generated Moodle configuration (git-ignored)
 │
-├── Documentation
+├── Documentation                     # Project documentation
 │   ├── docs/
 │   │   ├── project-overview-pdr.md
 │   │   ├── codebase-summary.md (this file)
 │   │   ├── code-standards.md
 │   │   ├── system-architecture.md
 │   │   └── RELEASE.md
-│   └── README.md                # Quick start guide
+│   ├── README.md                     # Quick start guide (780 tokens)
+│   └── CLAUDE.md                     # Claude AI guidance (301 tokens)
 │
-└── Development Tools
-    ├── .claude/                 # Claude AI workflows
-    ├── .opencode/               # OpenCode agent configurations
-    ├── .gitignore               # Git exclusions
-    └── .mcp.json                # MCP configuration
+└── Development Tools                 # Development assistance
+    ├── .claude/                      # Claude AI workflows (git-ignored)
+    ├── .opencode/                    # OpenCode agent configurations (git-ignored)
+    ├── .repomixignore               # Repomix exclusion patterns
+    └── .gitignore                   # Git exclusions
 ```
 
 ## Key Components
@@ -49,23 +51,28 @@ moodle-docker/
 ### 1. Docker Services
 
 #### Moodle Application Container
-- **Image**: Custom PHP 8.2 Apache image
-- **Port**: 18080 (mapped from internal 80)
+- **Base Image**: `php:8.2-apache`
+- **Dockerfile**: `Dockerfile.simple` (currently used)
+- **Container Name**: `moodle-app`
+- **Port Mapping**: `18080:80` (external:internal)
 - **Volumes**:
-  - `./moodle:/var/www/html` (source code)
-  - `./moodledata:/var/www/moodledata` (user files)
+  - `./moodle:/var/www/html` (bind mount - source code)
+  - `./moodledata:/var/www/moodledata` (bind mount - user files)
 - **Dependencies**: PostgreSQL health check
+- **Environment Variables**: DB connection parameters from .env
 
 #### PostgreSQL Database
-- **Image**: postgres:15-alpine
-- **Port**: 15432 (mapped from internal 5432)
-- **Volume**: `pgdata` (persistent database storage)
-- **Health Check**: pg_isready command
-- **Credentials**: Configurable via .env
+- **Base Image**: `postgres:15-alpine`
+- **Container Name**: `moodle-db`
+- **Port Mapping**: `15432:5432` (external:internal)
+- **Volume**: `pgdata` (named volume - persistent database storage)
+- **Health Check**: `pg_isready -U ${DB_USER:-moodle}` (10s interval, 5 retries)
+- **Environment**: Database name, user, password from .env
 
 #### Network Configuration
-- **Network**: moodle-network (bridge driver)
-- **DNS**: Internal service resolution
+- **Network**: `moodle-network` (bridge driver)
+- **DNS Resolution**: Internal service names (`postgres` → `moodle-db`)
+- **Isolation**: Services communicate within Docker network
 
 ### 2. Initialization Process
 
@@ -177,13 +184,13 @@ DB_PASSWORD=moodle_pass_2024 # Database password
 ```
 
 ### Port Configuration
-| Service | Internal | External | Purpose |
-|---------|----------|----------|---------|
-| Moodle | 80 | 18080 | Web interface |
-| PostgreSQL | 5432 | 15432 | Database |
-| Redis | 6379 | 16379 | Cache (planned) |
-| MailHog SMTP | 1025 | 11025 | Email testing |
-| MailHog UI | 8025 | 18025 | Email viewer |
+| Service | Internal | External | Purpose | Status |
+|---------|----------|----------|---------|--------|
+| Moodle | 80 | 18080 | Web interface | Active |
+| PostgreSQL | 5432 | 15432 | Database | Active |
+| Redis | 6379 | 16379 | Cache | Planned (not in compose) |
+| MailHog SMTP | 1025 | 11025 | Email testing | Configured (not in compose) |
+| MailHog UI | 8025 | 18025 | Email viewer | Configured (not in compose) |
 
 ### Volume Management
 - **pgdata**: PostgreSQL data (Docker managed)

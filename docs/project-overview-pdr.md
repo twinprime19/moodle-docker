@@ -29,35 +29,39 @@ Simplify Moodle development by eliminating environment setup complexities while 
 
 ### Core Capabilities
 1. **Rapid Setup** (<5 minutes)
-   - Automated Moodle source cloning
-   - Pre-configured PostgreSQL database
-   - Health check automation
+   - Automated Moodle 501_STABLE source cloning
+   - Pre-configured PostgreSQL 15 database with health checks
+   - Streamlined initialization with simple/full options
 
 2. **Non-Conflicting Ports**
-   - Custom port mapping (18080, 15432, etc.)
-   - Avoids common development port conflicts
-   - Configurable via environment variables
+   - Custom port mapping (18080 for web, 15432 for database)
+   - Avoids common development port conflicts (80, 3000, 5432)
+   - Configurable via environment variables with sensible defaults
 
 3. **Version Management**
-   - Easy switching between Moodle versions
-   - Git-based version control
-   - Branch checkout support (501_STABLE, 502_STABLE, etc.)
+   - Easy switching between Moodle versions (git-based)
+   - Default MOODLE_501_STABLE with upgrade paths
+   - Branch checkout support for development/testing
 
 4. **Live Development**
-   - Direct code editing in ./moodle/
-   - Instant reflection of changes
-   - No rebuild required for code changes
+   - Direct code editing in ./moodle/ directory
+   - Bind mount volumes for instant code reflection
+   - No container rebuild required for code changes
+   - Apache mod_rewrite enabled for Moodle routing
 
 5. **Data Persistence**
-   - PostgreSQL data in Docker volumes
-   - Moodledata directory mounting
-   - Consistent state across restarts
+   - PostgreSQL data in named Docker volume (pgdata)
+   - Moodledata directory bind-mounted to host
+   - Consistent state across container restarts
+   - Clean separation of code, data, and configuration
 
 ### Management Features
-- **Start/Stop Scripts**: Clean container lifecycle management
-- **Database Access**: Direct PostgreSQL CLI access
-- **Cache Management**: Built-in cache purging commands
-- **Log Monitoring**: Real-time log viewing capabilities
+- **Start/Stop Scripts**: Automated lifecycle with `start.sh` and `stop.sh`
+- **Port Cleanup**: Intelligent port management with conflict resolution
+- **Database Access**: Direct PostgreSQL CLI access via `docker exec`
+- **Cache Management**: Built-in Moodle cache purging via CLI
+- **Log Monitoring**: Real-time container log viewing
+- **Environment Management**: Template-based configuration with `.env.example`
 
 ## Requirements & Constraints
 
@@ -173,11 +177,12 @@ Simplify Moodle development by eliminating environment setup complexities while 
 - ✅ Port conflict resolution
 - ✅ Management scripts
 
-### Phase 2: Enhancement (Current)
-- 🔄 Documentation completion
-- 🔄 Redis cache integration
-- 🔄 MailHog email testing
-- 🔄 Development tools integration
+### Phase 2: Enhancement (Current - October 2025)
+- ✅ Documentation completion (comprehensive docs structure with PDR, architecture, code standards)
+- ⏳ Redis cache integration (prepared in configs, not yet active in compose)
+- ⏳ MailHog email testing (SMTP configured in init.sh, containers not in compose)
+- ✅ Development tools integration (Claude AI workflows, MCP server, repomix analysis)
+- ✅ Streamlined 2-service architecture (simplified from complex multi-service setup)
 
 ### Phase 3: Production Prep (Planned)
 - Security hardening

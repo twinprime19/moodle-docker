@@ -1,6 +1,6 @@
-# Moodle Docker Setup
+# Moodle Docker Development Environment
 
-Docker Compose setup for Moodle 501_STABLE development environment.
+A streamlined Docker Compose setup for Moodle 501_STABLE development with non-conflicting ports and automated installation.
 
 ## Documentation
 
@@ -8,6 +8,8 @@ Docker Compose setup for Moodle 501_STABLE development environment.
 - [System Architecture](docs/system-architecture.md) - Technical architecture and design decisions
 - [Codebase Summary](docs/codebase-summary.md) - Repository structure and component details
 - [Code Standards](docs/code-standards.md) - Coding conventions and best practices
+- [Deployment Guide](docs/deployment-guide.md) - Production deployment considerations
+- [Project Roadmap](docs/project-roadmap.md) - Development roadmap and future plans
 
 ## Quick Start
 
@@ -21,10 +23,14 @@ Docker Compose setup for Moodle 501_STABLE development environment.
    ```bash
    docker-compose up -d --build
    ```
+   Or use the start script:
+   ```bash
+   ./start.sh
+   ```
    First run will take ~5 minutes to:
-   - Build PHP 8.2 image with extensions
-   - Clone Moodle 501_STABLE from GitHub
-   - Set up PostgreSQL database
+   - Build PHP 8.2 image with essential extensions
+   - Clone Moodle 501_STABLE from GitHub (shallow clone)
+   - Set up PostgreSQL 15 database with health checks
 
 3. **Wait for Moodle to be ready:**
    ```bash
@@ -39,13 +45,15 @@ Docker Compose setup for Moodle 501_STABLE development environment.
 
 ## Services & Ports
 
-| Service | Internal Port | External Port | Purpose |
-|---------|--------------|---------------|---------|
-| Moodle | 80 | 18080 | Web interface |
-| PostgreSQL | 5432 | 15432 | Database |
-| Redis | 6379 | 16379 | Cache/Sessions |
-| MailHog | 1025 | 11025 | SMTP |
-| MailHog UI | 8025 | 18025 | Email viewer |
+| Service | Internal Port | External Port | Purpose | Status |
+|---------|--------------|---------------|---------|---------|
+| Moodle | 80 | 18080 | Web interface | ✅ Active |
+| PostgreSQL | 5432 | 15432 | Database | ✅ Active |
+| Redis | 6379 | 16379 | Cache/Sessions | ⏳ Planned |
+| MailHog | 1025 | 11025 | SMTP | ⏳ Configured |
+| MailHog UI | 8025 | 18025 | Email viewer | ⏳ Configured |
+
+**Note**: Redis and MailHog are configured but not currently in the Docker Compose stack. They can be added as needed.
 
 ## Managing Moodle
 
@@ -87,14 +95,18 @@ docker exec -it moodle-app php admin/cli/purge_caches.php
 
 ```
 moodle-docker/
-├── docker-compose.yml     # Services configuration
-├── Dockerfile            # Moodle image build
-├── init.sh              # Auto-installation script
-├── stop.sh              # Clean shutdown script
-├── .env                 # Your environment config
-├── moodle/              # Moodle source (auto-cloned)
-├── moodledata/          # Moodle files/uploads
-└── config/              # Generated configs
+├── docker-compose.yml     # Services configuration (2 services)
+├── Dockerfile            # Full Moodle image (unused)
+├── Dockerfile.simple     # Simple Moodle image (current)
+├── init.sh              # Full auto-installation script
+├── init-simple.sh       # Simple initialization script
+├── start.sh             # Startup script with status
+├── stop.sh              # Clean shutdown with port cleanup
+├── .env.example         # Environment template
+├── .env                 # Your environment config (created from template)
+├── moodle/              # Moodle source (auto-cloned, git-ignored)
+├── moodledata/          # Moodle files/uploads (persistent)
+└── docs/                # Project documentation
 ```
 
 ## Troubleshooting
